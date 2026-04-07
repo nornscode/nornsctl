@@ -2,26 +2,40 @@
 
 CLI for the [Norns](https://github.com/amackera/norns) durable agent runtime.
 
-Thin wrapper over the Norns REST API. Inspect runs, tail events, retry failed runs, check worker status.
+Thin wrapper over the Norns REST API. Inspect agents, runs, events, conversations, and retry failed runs.
 
-## Status
+## Install
 
-Not yet implemented. This README is the plan.
+```bash
+go install github.com/amackera/nornsctl@latest
+```
 
-## Planned commands
+Or build from source:
+
+```bash
+git clone https://github.com/amackera/nornsctl.git
+cd nornsctl
+go build -o nornsctl .
+```
+
+## Commands
 
 ```
-nornsctl agents list                     List agents
-nornsctl agents show <id|name>           Show agent details
+nornsctl agents list                              List agents
+nornsctl agents show <id>                         Show agent details
+nornsctl agents create --name ... --system-prompt ... Create an agent
+nornsctl agents update <id> --name ...            Update an agent
+nornsctl agents status <id>                       Get agent process status
+nornsctl agents message <id> --content "..."      Send a message to an agent
 
-nornsctl runs list [--agent <name>]      List runs (optionally filtered by agent)
-nornsctl runs show <id>                  Show run details + failure inspector
-nornsctl runs events <id>                Print event log
-nornsctl runs retry <id>                 Retry a failed run with the same input
-nornsctl runs tail <id>                  Stream events in real-time (WebSocket)
+nornsctl runs list [--agent <id>] [--limit N]     List runs
+nornsctl runs show <id>                           Show run details + failure inspector
+nornsctl runs events <id> [--json]                Print event log
+nornsctl runs retry <id>                          Retry a failed run
 
-nornsctl workers list                    List connected workers
-nornsctl workers status                  Worker health summary
+nornsctl conversations list <agent_id>            List conversations
+nornsctl conversations show <agent_id> <key>      Show conversation details
+nornsctl conversations delete <agent_id> <key>    Delete a conversation
 ```
 
 ## Configuration
@@ -31,14 +45,7 @@ export NORNS_URL=http://localhost:4000
 export NORNS_API_KEY=nrn_...
 ```
 
-Or via flags: `nornsctl --url http://... --token nrn_... runs list`
-
-## Implementation
-
-- Python (single dependency: `httpx`)
-- Packaged via `uv` / PyPI as `nornsctl`
-- Uses the same REST API as `norns-sdk-python` client, but optimized for terminal output
-- Real-time event tailing via WebSocket
+Or via flags: `nornsctl --url http://... --api-key nrn_... agents list`
 
 ## License
 
