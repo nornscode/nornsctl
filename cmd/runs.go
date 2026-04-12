@@ -183,11 +183,14 @@ var runsTailCmd = &cobra.Command{
 			key = os.Getenv("NORNS_API_KEY")
 		}
 
+		debug, _ := cmd.Flags().GetBool("debug")
+
 		return ws.Tail(ws.TailConfig{
 			BaseURL: url,
 			APIKey:  key,
 			AgentID: run.AgentID,
 			RunID:   id,
+			Debug:   debug,
 		}, func(e ws.Event) {
 			printTailEvent(e.Time.Format("15:04:05"), e.Type, wsSummary(e))
 		})
@@ -305,4 +308,6 @@ func init() {
 	runsListCmd.Flags().Int("limit", 50, "Max number of runs to return")
 
 	runsEventsCmd.Flags().Bool("json", false, "Output events as JSON")
+
+	runsTailCmd.Flags().Bool("debug", false, "Print raw WebSocket messages to stderr")
 }

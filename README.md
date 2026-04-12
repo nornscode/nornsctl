@@ -7,6 +7,12 @@ Thin wrapper over the Norns REST API. Inspect agents, runs, events, conversation
 ## Install
 
 ```bash
+brew install amackera/tap/nornsctl
+```
+
+Or via Go:
+
+```bash
 go install github.com/amackera/nornsctl@latest
 ```
 

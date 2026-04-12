@@ -18,6 +18,10 @@ var rootCmd = &cobra.Command{
 	Short: "CLI for the Norns durable agent runtime",
 }
 
+func SetVersion(v string) {
+	rootCmd.Version = v
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

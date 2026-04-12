@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -23,6 +24,7 @@ type TailConfig struct {
 	APIKey   string
 	AgentID  int
 	RunID    int
+	Debug    bool
 }
 
 // Tail connects to the Phoenix agent channel and streams events.
@@ -92,6 +94,10 @@ func Tail(cfg TailConfig, onEvent func(Event)) error {
 		_, msgData, err := conn.ReadMessage()
 		if err != nil {
 			return nil // connection closed
+		}
+
+		if cfg.Debug {
+			fmt.Fprintf(os.Stderr, "DEBUG ws recv: %s\n", string(msgData))
 		}
 
 		var msg []json.RawMessage
