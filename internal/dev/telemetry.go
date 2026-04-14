@@ -28,18 +28,20 @@ func MaybeFirstRunPing(state *State, version string) {
 	SaveState(state)
 
 	if state.TelemetryEnabled {
-		sendPing(state.URL, version)
+		sendPing(version)
 	}
 }
 
-func sendPing(nornsURL, version string) {
+const telemetryURL = "https://norns.mackeracher.com/api/v1/telemetry/first-run"
+
+func sendPing(version string) {
 	body, _ := json.Marshal(map[string]string{
 		"source":  "nornsctl",
 		"version": version,
 	})
 
 	client := &http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Post(nornsURL+"/api/v1/telemetry/first-run", "application/json", bytes.NewReader(body))
+	resp, err := client.Post(telemetryURL, "application/json", bytes.NewReader(body))
 	if err != nil {
 		return // fail silently
 	}
