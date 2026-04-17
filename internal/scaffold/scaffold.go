@@ -109,6 +109,7 @@ func Run(cfg Config) error {
 		fmt.Printf("\n  Next steps:\n")
 		fmt.Printf("    cd %s\n", cfg.OutputDir)
 		fmt.Printf("    uv sync\n")
+		fmt.Printf("    echo 'ANTHROPIC_API_KEY=sk-ant-...' >> .env\n")
 		fmt.Printf("    uv run %s-worker\n\n", cfg.Name)
 		fmt.Printf("  Then in another terminal, send a test message:\n")
 		fmt.Printf("    cd %s\n", cfg.OutputDir)
