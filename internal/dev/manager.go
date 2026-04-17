@@ -143,20 +143,25 @@ func Up(state *State, background bool, version string, port string) error {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 
+	// Stream logs in background, wait for signal on main goroutine
 	go func() {
-		<-sig
-		fmt.Println("\nStopping...")
-		Down()
-		os.Exit(0)
+		_ = StreamLogs(NornsName)
 	}()
 
-	return StreamLogs(NornsName)
+	<-sig
+	signal.Stop(sig)
+	fmt.Println("\nStopping...")
+	Down()
+	os.Exit(0)
+	return nil // unreachable, but needed for compiler
 }
 
 // Down stops and removes the dev containers.
 func Down() {
+	// Use force-remove directly. docker stop can be interrupted by
+	// the same SIGINT that triggered this shutdown, leaving containers
+	// running. Force-remove is immediate and reliable.
 	for _, name := range []string{NornsName, PostgresName} {
-		StopContainer(name)
 		RemoveContainer(name)
 	}
 	RemoveNetwork(NetworkName)

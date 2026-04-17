@@ -6,11 +6,15 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // docker runs a docker command and returns combined output.
+// Child processes are placed in their own process group so terminal
+// SIGINT doesn't kill them (important during Ctrl-C shutdown).
 func docker(args ...string) (string, error) {
 	cmd := exec.Command("docker", args...)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
