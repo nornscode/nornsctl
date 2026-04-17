@@ -1,4 +1,4 @@
-"""Send a message to the {{.Name}} agent."""
+"""Send a message to the {{.Name}} agent and print the response."""
 
 from norns import NornsClient
 
@@ -7,8 +7,12 @@ from {{.PackageName}} import config
 
 def main():
     client = NornsClient(config.NORNS_URL, api_key=config.NORNS_API_KEY)
-    result = client.send_message("{{.Name}}", "Hello! What can you do?")
-    print(f"Run {result.run_id}: {result.status}")
+    result = client.send_message("{{.Name}}", "Hello! What can you do?", wait=True, timeout=60)
+
+    if result.status == "completed":
+        print(result.output)
+    else:
+        print(f"Run {result.run_id} {result.status}")
 
 
 if __name__ == "__main__":
