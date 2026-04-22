@@ -20,10 +20,10 @@ archives:
 
 brews:
   - repository:
-      owner: amackera
+      owner: nornscode
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    homepage: https://github.com/amackera/nornsctl
+    homepage: https://github.com/nornscode/nornsctl
     description: CLI for the Norns durable agent runtime
     license: MIT
     install: |

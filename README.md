@@ -1,11 +1,11 @@
 # nornsctl
 
-CLI for the [Norns](https://github.com/amackera/norns) durable agent runtime.
+CLI for the [Norns](https://github.com/nornscode/norns) durable agent runtime.
 
 ## Quickstart
 
 ```bash
-brew install amackera/tap/nornsctl
+brew install nornscode/tap/nornsctl
 nornsctl dev
 nornsctl new my-agent
 cd my-agent
@@ -18,19 +18,19 @@ That's it. You have a running Norns server and a connected agent worker.
 ## Install
 
 ```bash
-brew install amackera/tap/nornsctl
+brew install nornscode/tap/nornsctl
 ```
 
 Or via Go:
 
 ```bash
-go install github.com/amackera/nornsctl@latest
+go install github.com/nornscode/nornsctl@latest
 ```
 
 Or build from source:
 
 ```bash
-git clone https://github.com/amackera/nornsctl.git
+git clone https://github.com/nornscode/nornsctl.git
 cd nornsctl
 go build -o nornsctl .
 ```

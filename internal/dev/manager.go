@@ -16,7 +16,7 @@ const (
 	NornsName     = "nornsctl-dev-norns"
 	VolumeName    = "nornsctl-dev-postgres-data"
 	PostgresImage = "postgres:16-alpine"
-	NornsImage    = "ghcr.io/amackera/norns:main"
+	NornsImage    = "ghcr.io/nornscode/norns:main"
 	DefaultPort   = "4000"
 	PostgresUser  = "norns"
 	PostgresPass  = "norns"
