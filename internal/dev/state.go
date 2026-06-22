@@ -11,6 +11,7 @@ type State struct {
 	URL              string    `json:"url"`
 	APIKey           string    `json:"api_key"`
 	SecretKeyBase    string    `json:"secret_key_base"`
+	Image            string    `json:"image,omitempty"`
 	StartedAt        time.Time `json:"started_at"`
 	TelemetryAsked   bool      `json:"telemetry_asked"`
 	TelemetryEnabled bool      `json:"telemetry_enabled"`

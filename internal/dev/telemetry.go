@@ -17,6 +17,9 @@ func MaybeFirstRunPing(state *State, version string) {
 	if state.TelemetryAsked {
 		return
 	}
+	if !stdinIsTerminal() {
+		return
+	}
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("  Send anonymous first-run telemetry to help improve Norns? [Y/n] ")
@@ -46,4 +49,12 @@ func sendPing(version string) {
 		return // fail silently
 	}
 	resp.Body.Close()
+}
+
+func stdinIsTerminal() bool {
+	info, err := os.Stdin.Stat()
+	if err != nil {
+		return false
+	}
+	return info.Mode()&os.ModeCharDevice != 0
 }

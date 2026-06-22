@@ -77,6 +77,12 @@ func PullImage(img string) error {
 	return cmd.Run()
 }
 
+// ImageExists checks if a Docker image is already available locally.
+func ImageExists(img string) bool {
+	_, err := docker("image", "inspect", img)
+	return err == nil
+}
+
 // NetworkExists checks if a Docker network exists.
 func NetworkExists(name string) bool {
 	out, err := docker("network", "ls", "--filter", "name="+name, "--format", "{{.Name}}")

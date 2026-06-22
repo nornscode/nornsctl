@@ -50,6 +50,16 @@ nornsctl dev reset                                Stop and delete all data
 
 Requires Docker. Runs Postgres and Norns in containers, generates an API key, and stores state in `~/.nornsctl/dev/`.
 
+By default, `nornsctl dev` runs `ghcr.io/nornscode/norns:main`. To test another image:
+
+```bash
+nornsctl dev --image local/norns:dev
+# or
+NORNS_DEV_IMAGE=local/norns:dev nornsctl dev up
+```
+
+If pulling the default image fails with an authorization error, make sure the package is public or run `docker login ghcr.io` if you are testing a private package.
+
 ### Scaffolding
 
 ```

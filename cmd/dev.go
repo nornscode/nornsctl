@@ -102,7 +102,8 @@ func runDevCmd(background bool) func(cmd *cobra.Command, args []string) error {
 		}
 
 		port, _ := cmd.Flags().GetString("port")
-		return dev.Up(state, background, rootCmd.Version, port)
+		image, _ := cmd.Flags().GetString("image")
+		return dev.Up(state, background, rootCmd.Version, port, image)
 	}
 }
 
@@ -115,4 +116,5 @@ func init() {
 	devCmd.AddCommand(devResetCmd)
 
 	devCmd.PersistentFlags().String("port", "4000", "Port for the Norns server")
+	devCmd.PersistentFlags().String("image", "", "Norns Docker image (env: NORNS_DEV_IMAGE, default: ghcr.io/nornscode/norns:main)")
 }

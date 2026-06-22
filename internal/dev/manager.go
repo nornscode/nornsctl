@@ -6,29 +6,32 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
 
 const (
-	NetworkName   = "nornsctl-dev"
-	PostgresName  = "nornsctl-dev-postgres"
-	NornsName     = "nornsctl-dev-norns"
-	VolumeName    = "nornsctl-dev-postgres-data"
-	PostgresImage = "postgres:16-alpine"
-	NornsImage    = "ghcr.io/nornscode/norns:main"
-	DefaultPort   = "4000"
-	PostgresUser  = "norns"
-	PostgresPass  = "norns"
-	PostgresDB    = "norns_dev"
+	NetworkName       = "nornsctl-dev"
+	PostgresName      = "nornsctl-dev-postgres"
+	NornsName         = "nornsctl-dev-norns"
+	VolumeName        = "nornsctl-dev-postgres-data"
+	PostgresImage     = "postgres:16-alpine"
+	DefaultNornsImage = "ghcr.io/nornscode/norns:main"
+	EnvNornsImage     = "NORNS_DEV_IMAGE"
+	DefaultPort       = "4000"
+	PostgresUser      = "norns"
+	PostgresPass      = "norns"
+	PostgresDB        = "norns_dev"
 )
 
 // Up starts the dev server. If background is false, streams logs and stops
 // containers on Ctrl-C.
-func Up(state *State, background bool, version string, port string) error {
+func Up(state *State, background bool, version string, port string, image string) error {
 	if port == "" {
 		port = DefaultPort
 	}
+	nornsImage := ResolveNornsImage(image, state)
 
 	// Check port is free
 	if err := checkPort(port); err != nil {
@@ -37,6 +40,7 @@ func Up(state *State, background bool, version string, port string) error {
 
 	// Update state URL to reflect the port
 	state.URL = fmt.Sprintf("http://localhost:%s", port)
+	state.Image = nornsImage
 	if err := SaveState(state); err != nil {
 		return err
 	}
@@ -53,11 +57,20 @@ func Up(state *State, background bool, version string, port string) error {
 		}
 	}
 
-	// Pull images
-	for _, img := range []string{PostgresImage, NornsImage} {
-		if err := PullImage(img); err != nil {
-			return fmt.Errorf("pulling %s: %w", img, err)
-		}
+	if err := PullImage(PostgresImage); err != nil {
+		return fmt.Errorf("pulling %s: %w", PostgresImage, err)
+	}
+	if err := ensureNornsImage(nornsImage); err != nil {
+		return fmt.Errorf(`pulling Norns image %q failed: %w
+
+The default image is %s. If the image is private, run:
+  docker login ghcr.io
+
+To use a local or alternate image, run:
+  nornsctl dev --image your-image:tag
+
+or set:
+  %s=your-image:tag`, nornsImage, err, DefaultNornsImage, EnvNornsImage)
 	}
 
 	// Start Postgres (no host port — only accessible via Docker network)
@@ -112,7 +125,7 @@ func Up(state *State, background bool, version string, port string) error {
 			"-e", "NORNS_DEFAULT_TENANT_KEY=" + state.APIKey,
 			"-e", "PHX_HOST=localhost",
 			"-e", "PORT=4000",
-			NornsImage,
+			nornsImage,
 		})
 		if err != nil {
 			return fmt.Errorf("starting norns: %w", err)
@@ -129,7 +142,9 @@ func Up(state *State, background bool, version string, port string) error {
 	fmt.Printf("\n  Norns is running at http://localhost:%s\n", port)
 	fmt.Printf("  API key: %s\n\n", state.APIKey)
 
-	MaybeFirstRunPing(state, version)
+	if !background {
+		MaybeFirstRunPing(state, version)
+	}
 
 	if background {
 		fmt.Println("  Stop with: nornsctl dev down")
@@ -195,12 +210,36 @@ func StatusInfo() {
 
 	fmt.Printf("URL:      %s\n", state.URL)
 	fmt.Printf("API Key:  %s\n", state.APIKey)
+	fmt.Printf("Image:    %s\n", ResolveNornsImage("", state))
 	fmt.Printf("Started:  %s\n", state.StartedAt.Format("2006-01-02 15:04:05"))
 	fmt.Printf("Postgres: %s\n", runStatus(PostgresName))
 	fmt.Printf("Norns:    %s\n", runStatus(NornsName))
 }
 
 // --- internal ---
+
+func ResolveNornsImage(flagValue string, state *State) string {
+	if img := strings.TrimSpace(flagValue); img != "" {
+		return img
+	}
+	if img := strings.TrimSpace(os.Getenv(EnvNornsImage)); img != "" {
+		return img
+	}
+	if state != nil {
+		if img := strings.TrimSpace(state.Image); img != "" {
+			return img
+		}
+	}
+	return DefaultNornsImage
+}
+
+func ensureNornsImage(img string) error {
+	if img != DefaultNornsImage && ImageExists(img) {
+		fmt.Printf("Using local Norns image %s\n", img)
+		return nil
+	}
+	return PullImage(img)
+}
 
 func checkPort(port string) error {
 	ln, err := net.Listen("tcp", ":"+port)
