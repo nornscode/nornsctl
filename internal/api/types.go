@@ -55,8 +55,16 @@ type Run struct {
 	Output           *string          `json:"output"`
 	FailureMetadata  map[string]any   `json:"failure_metadata"`
 	FailureInspector *FailureInspector `json:"failure_inspector"`
+	WaitingFor       *WaitingFor      `json:"waiting_for"`
 	InsertedAt       time.Time        `json:"inserted_at"`
 	UpdatedAt        time.Time        `json:"updated_at"`
+}
+
+// WaitingFor is the question a run is parked on, set when Status is "waiting".
+type WaitingFor struct {
+	Question   string     `json:"question"`
+	ToolCallID string     `json:"tool_call_id"`
+	AskedAt    *time.Time `json:"asked_at"`
 }
 
 type FailureInspector struct {

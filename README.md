@@ -86,6 +86,7 @@ nornsctl runs list [--agent <id>] [--limit N]     List runs
 nornsctl runs show <id>                           Show run details + failure inspector
 nornsctl runs events <id> [--json]                Print event log
 nornsctl runs retry <id>                          Retry a failed run
+nornsctl runs reply <id> "<answer>"               Answer a run waiting on a question
 nornsctl runs tail <id>                           Stream events in real-time
 ```
 

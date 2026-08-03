@@ -84,3 +84,12 @@ func (s *RunService) Retry(id int) (*RetryResponse, error) {
 	}
 	return &resp, nil
 }
+
+// Reply answers a run parked on an ask_human question.
+func (s *RunService) Reply(id int, answer string) error {
+	body := map[string]string{"answer": answer}
+	if _, err := s.Client.Post(fmt.Sprintf("/runs/%d/reply", id), body); err != nil {
+		return err
+	}
+	return nil
+}

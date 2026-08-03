@@ -74,6 +74,12 @@ var runsShowCmd = &cobra.Command{
 		fmt.Printf("Created:      %s\n", r.InsertedAt.Format("2006-01-02 15:04:05"))
 		fmt.Printf("Updated:      %s\n", r.UpdatedAt.Format("2006-01-02 15:04:05"))
 
+		if r.WaitingFor != nil {
+			fmt.Println("\nWaiting for a human:")
+			fmt.Printf("  Question: %s\n", r.WaitingFor.Question)
+			fmt.Printf("\nAnswer with: nornsctl runs reply %d \"...\"\n", r.ID)
+		}
+
 		if r.FailureInspector != nil {
 			fmt.Println("\nFailure Inspector:")
 			fmt.Printf("  Error Class:    %s\n", r.FailureInspector.ErrorClass)
@@ -133,6 +139,25 @@ var runsRetryCmd = &cobra.Command{
 			return err
 		}
 		fmt.Printf("Retry accepted. New run ID: %d\n", resp.RunID)
+		return nil
+	},
+}
+
+var runsReplyCmd = &cobra.Command{
+	Use:   "reply <id> <answer>",
+	Short: "Answer a run waiting on a question",
+	Args:  cobra.ExactArgs(2),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			return fmt.Errorf("invalid run ID: %s", args[0])
+		}
+
+		svc := &api.RunService{Client: newClient()}
+		if err := svc.Reply(id, args[1]); err != nil {
+			return err
+		}
+		fmt.Printf("Answer delivered to run %d.\n", id)
 		return nil
 	},
 }
@@ -302,6 +327,7 @@ func init() {
 	runsCmd.AddCommand(runsShowCmd)
 	runsCmd.AddCommand(runsEventsCmd)
 	runsCmd.AddCommand(runsRetryCmd)
+	runsCmd.AddCommand(runsReplyCmd)
 	runsCmd.AddCommand(runsTailCmd)
 
 	runsListCmd.Flags().Int("agent", 0, "Filter by agent ID")
