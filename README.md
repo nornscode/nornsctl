@@ -105,6 +105,16 @@ nornsctl triggers fire <id>                       Fire now, outside the schedule
 nornsctl triggers delete <id>                     Delete a trigger
 ```
 
+### Gards
+
+```
+nornsctl gards list                               List gards (worker execution contexts)
+nornsctl gards create [--name N] [--template T]   Create a gard; prints its claim token once
+nornsctl gards inspect <id>                       Show gard details and ports
+nornsctl gards ports <id>                         List a gard's registered ports
+nornsctl gards destroy <id> [--force]             Destroy a gard (kicks its worker)
+```
+
 ### Conversations
 
 ```
