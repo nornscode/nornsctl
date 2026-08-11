@@ -1,0 +1,105 @@
+# {{.Name}} — agent project guide
+
+This file teaches a coding agent (Claude Code, Cursor, or any other) how to
+develop, test, and debug this project. Follow it instead of guessing.
+
+## What this is
+
+A worker for [Norns](https://github.com/nornscode/norns), a durable agent
+runtime. The split that matters:
+
+- **Norns (the orchestrator)** runs the agent loop as durable state: it
+  persists every step, dispatches work, and recovers from crashes. It never
+  executes anything itself.
+- **This project (the worker)** holds the actual capabilities: the agent
+  definition, the tool functions, and the LLM API keys. It connects out to
+  Norns over WebSocket and executes what the orchestrator dispatches.
+
+The agent definition lives in code (`{{.PackageName}}/worker.py`) and is
+synced to Norns every time the worker starts — edit the prompt or model
+there, restart the worker, and the change is live. Repo + secrets fully
+reconstitute this agent anywhere.
+
+## The development loop
+
+1. **Edit** — change the agent def in `{{.PackageName}}/worker.py` or add a
+   tool (see below).
+2. **Run the worker** — `uv run {{.Name}}-worker`. Leave it running; it
+   syncs the def and serves tasks. Restart it after code changes.
+3. **Send a test message** — either:
+   - `uv run {{.Name}}-client` (interactive, handles questions), or
+   - `nornsctl agents message <agent-id> --content "..." --wait` (prints the
+     final output, failure summary, or the question the agent is stuck on).
+4. **Read what actually happened** — `nornsctl runs events <run-id>` shows
+   the full event log: every LLM request (including which tools were
+   offered), every tool call and result, every checkpoint. This is ground
+   truth; prefer it over guessing from the output.
+5. Iterate.
+
+Useful inspection commands:
+
+```
+nornsctl agents list                       # find the agent id
+nornsctl runs list --agent <id> --limit 5  # recent runs
+nornsctl runs show <run-id>                # status, output, failure inspector
+nornsctl runs events <run-id> [--json]     # full event log
+nornsctl runs reply <run-id> "<answer>"    # answer a waiting agent
+```
+
+`NORNS_URL` and `NORNS_API_KEY` come from `.env` (already wired if
+`nornsctl dev` was running at scaffold time).
+
+## Adding a tool
+
+One tool = one function in `{{.PackageName}}/tools/`, registered in
+`all_tools`:
+
+```python
+from norns import tool
+
+@tool
+def lookup_order(order_id: str) -> str:
+    """One-line description the LLM sees. Write it for the model."""
+    return f"Order {order_id}: shipped"
+```
+
+Rules that matter:
+
+- The docstring is the tool's interface — the model decides when to call it
+  based on that line. Be precise.
+- Type hints become the JSON schema. Stick to str/int/float/bool.
+- Anything that writes to the outside world (sends, posts, deletes) gets
+  `@tool(side_effect=True)` so Norns can deduplicate it on crash replay.
+- Return a string. Raise on failure — the error is fed back to the model,
+  which can recover.
+- Add the function to `all_tools` in `{{.PackageName}}/tools/__init__.py` or
+  it won't be registered.
+
+## Debugging a failing run
+
+Start with `nornsctl runs show <run-id>` — the failure inspector gives the
+error class, code, and retry decision. Then `nornsctl runs events <run-id>`
+to see the exact LLM request/response and tool results leading up to the
+failure. Common cases:
+
+- **Tool error in the log** — the model saw it too; check whether it
+  recovered or gave up. Fix the tool or its docstring.
+- **Run stuck in `waiting`** — the agent asked a human something
+  (`ask_human`). Answer with `nornsctl runs reply`.
+- **Run stuck in `running` with no events accruing** — the worker probably
+  isn't connected. Check the worker terminal.
+- **Max steps exceeded** — the model is looping; usually a tool returning
+  something unusable. Read the last few tool results.
+
+## Deploying
+
+The worker is stateless — all durable state lives in Norns. Run it anywhere
+that can reach `NORNS_URL`, with the `.env` values as environment variables:
+
+```
+docker build -t {{.Name}} .
+docker run --env-file .env {{.Name}}
+```
+
+Restarts are safe: in-flight runs resume from Norns' event log, and
+side-effecting tools are deduplicated on replay.

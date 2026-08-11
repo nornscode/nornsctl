@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 	"text/tabwriter"
+	"time"
 
 	"github.com/amackera/nornsctl/internal/api"
 	"github.com/spf13/cobra"
@@ -181,6 +182,8 @@ var agentsMessageCmd = &cobra.Command{
 
 		content, _ := cmd.Flags().GetString("content")
 		convKey, _ := cmd.Flags().GetString("conversation-key")
+		wait, _ := cmd.Flags().GetBool("wait")
+		timeout, _ := cmd.Flags().GetInt("timeout")
 
 		input := api.SendMessageInput{
 			Content:         content,
@@ -193,8 +196,58 @@ var agentsMessageCmd = &cobra.Command{
 			return err
 		}
 		fmt.Printf("Message accepted. Run ID: %d\n", resp.RunID)
-		return nil
+
+		if !wait {
+			return nil
+		}
+
+		return waitForRun(resp.RunID, timeout)
 	},
+}
+
+// Poll the run until it reaches a state where waiting longer is pointless:
+// completed, failed, or parked on a human question.
+func waitForRun(runID, timeoutSeconds int) error {
+	runs := &api.RunService{Client: newClient()}
+	deadline := time.Now().Add(time.Duration(timeoutSeconds) * time.Second)
+
+	for {
+		if time.Now().After(deadline) {
+			return fmt.Errorf("timed out after %ds — run %d is still going (check: nornsctl runs show %d)", timeoutSeconds, runID, runID)
+		}
+
+		run, err := runs.Get(runID)
+		if err != nil {
+			return err
+		}
+
+		switch run.Status {
+		case "completed":
+			if run.Output != nil {
+				fmt.Printf("\n%s\n", *run.Output)
+			}
+			return nil
+
+		case "failed":
+			fmt.Printf("\nRun %d failed.\n", runID)
+			if fi := run.FailureInspector; fi != nil {
+				fmt.Printf("  Error Class:    %s\n", fi.ErrorClass)
+				fmt.Printf("  Error Code:     %s\n", fi.ErrorCode)
+				fmt.Printf("  Retry Decision: %s\n", fi.RetryDecision)
+			}
+			fmt.Printf("  Events: nornsctl runs events %d\n", runID)
+			return fmt.Errorf("run %d failed", runID)
+
+		case "waiting":
+			if run.WaitingFor != nil {
+				fmt.Printf("\nAgent is waiting for you: %s\n", run.WaitingFor.Question)
+				fmt.Printf("Answer with: nornsctl runs reply %d \"<answer>\"\n", runID)
+			}
+			return nil
+		}
+
+		time.Sleep(1 * time.Second)
+	}
 }
 
 func init() {
@@ -222,5 +275,7 @@ func init() {
 
 	agentsMessageCmd.Flags().String("content", "", "Message content (required)")
 	agentsMessageCmd.Flags().String("conversation-key", "", "Conversation key for multi-turn")
+	agentsMessageCmd.Flags().Bool("wait", false, "Block until the run completes, fails, or asks a question, then print the result")
+	agentsMessageCmd.Flags().Int("timeout", 120, "Seconds to wait with --wait before giving up")
 	agentsMessageCmd.MarkFlagRequired("content")
 }

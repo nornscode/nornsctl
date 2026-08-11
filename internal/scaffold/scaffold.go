@@ -26,6 +26,33 @@ func IsSupported(language string) bool {
 	return false
 }
 
+// SupportedTemplates returns the template names available for a language.
+func SupportedTemplates(language string) []string {
+	root := filepath.Join("templates", language)
+	entries, err := fs.ReadDir(templates, root)
+	if err != nil {
+		return nil
+	}
+
+	var names []string
+	for _, e := range entries {
+		if e.IsDir() {
+			names = append(names, e.Name())
+		}
+	}
+	return names
+}
+
+// IsSupportedTemplate checks if a template exists for a language.
+func IsSupportedTemplate(language, name string) bool {
+	for _, t := range SupportedTemplates(language) {
+		if t == name {
+			return true
+		}
+	}
+	return false
+}
+
 // Config holds the template variables and scaffold options.
 type Config struct {
 	Name        string
@@ -33,6 +60,7 @@ type Config struct {
 	NornsURL    string
 	NornsAPIKey string
 	Language    string
+	Template    string
 	OutputDir   string
 }
 
@@ -43,8 +71,8 @@ func Run(cfg Config) error {
 		return err
 	}
 
-	// Walk the embedded template tree for the language
-	root := filepath.Join("templates", cfg.Language)
+	// Walk the embedded template tree for the language + template
+	root := filepath.Join("templates", cfg.Language, cfg.Template)
 	err := fs.WalkDir(templates, root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err

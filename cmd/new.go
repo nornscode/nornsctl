@@ -41,6 +41,11 @@ var newCmd = &cobra.Command{
 			return fmt.Errorf("unsupported language: %s. Supported: %s", language, strings.Join(scaffold.SupportedLanguages(), ", "))
 		}
 
+		tmpl, _ := cmd.Flags().GetString("template")
+		if !scaffold.IsSupportedTemplate(language, tmpl) {
+			return fmt.Errorf("unknown template: %s. Available for %s: %s", tmpl, language, strings.Join(scaffold.SupportedTemplates(language), ", "))
+		}
+
 		dir, _ := cmd.Flags().GetString("dir")
 		if dir == "" {
 			dir = name
@@ -52,6 +57,7 @@ var newCmd = &cobra.Command{
 			Name:        name,
 			PackageName: packageName,
 			Language:    language,
+			Template:    tmpl,
 			OutputDir:   dir,
 		})
 	},
@@ -81,5 +87,6 @@ func validateName(name string) error {
 func init() {
 	rootCmd.AddCommand(newCmd)
 	newCmd.Flags().String("language", "python", "Template language (supported: python)")
+	newCmd.Flags().String("template", "default", "Project template (default, slack-bot)")
 	newCmd.Flags().String("dir", "", "Output directory (default: ./<name>)")
 }

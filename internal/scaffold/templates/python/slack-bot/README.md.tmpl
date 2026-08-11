@@ -1,0 +1,49 @@
+# {{.Name}}
+
+A Slack bot agent worker for [Norns](https://github.com/nornscode/norns). Ships with outbound Slack tools (post_to_slack, list_slack_channels) — the bot token stays in this worker, never in Norns.
+
+## Setup
+
+Install dependencies:
+
+```bash
+uv sync
+```
+
+Configure environment:
+
+```bash
+cp .env.example .env
+# Fill in NORNS_URL, NORNS_API_KEY, and ANTHROPIC_API_KEY
+```
+
+Or if you have `nornsctl dev` running, `.env` is already configured.
+
+## Run
+
+Start the worker (keeps running, handles tasks from Norns):
+
+```bash
+uv run {{.Name}}-worker
+```
+
+Send a test message (in another terminal):
+
+```bash
+uv run python -m {{.PackageName}}.client
+```
+
+## Adding tools
+
+Define tools in `{{.PackageName}}/tools/` using the `@tool` decorator:
+
+```python
+from norns import tool
+
+@tool
+def my_tool(query: str) -> str:
+    """Description shown to the LLM."""
+    return f"Result for {query}"
+```
+
+Then add it to the `all_tools` list in `{{.PackageName}}/tools/__init__.py`.

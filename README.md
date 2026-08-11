@@ -63,10 +63,10 @@ If pulling the default image fails with an authorization error, make sure the pa
 ### Scaffolding
 
 ```
-nornsctl new <name> [--language python] [--dir .]  Create a new agent project
+nornsctl new <name> [--template default|slack-bot] [--language python] [--dir .]
 ```
 
-Generates a ready-to-run agent worker project. If `nornsctl dev` is running, the project is automatically configured with the server URL and API key.
+Generates a ready-to-run agent worker project. Every scaffold ships an `AGENTS.md` that teaches a coding agent (Claude Code, Cursor, …) the full build/test/debug loop, plus a Dockerfile for deployment. The `slack-bot` template adds outbound Slack tools (`post_to_slack`, `list_slack_channels`) wired to a `SLACK_BOT_TOKEN` that never leaves the worker. If `nornsctl dev` is running, the project is automatically configured with the server URL and API key.
 
 ### Agents
 
@@ -76,7 +76,9 @@ nornsctl agents show <id>                         Show agent details
 nornsctl agents create --name ... --system-prompt ... Create an agent
 nornsctl agents update <id> --name ...            Update an agent
 nornsctl agents status <id>                       Get agent process status
-nornsctl agents message <id> --content "..."      Send a message to an agent
+nornsctl agents message <id> --content "..." [--wait [--timeout N]]
+                                                  Send a message; --wait blocks until the run
+                                                  completes, fails, or asks a question
 ```
 
 ### Runs

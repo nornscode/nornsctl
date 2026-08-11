@@ -1,0 +1,43 @@
+"""Send a message to the {{.Name}} agent and print the response."""
+
+from norns import NornsClient
+
+from {{.PackageName}} import config
+
+
+def main():
+    client = NornsClient(config.NORNS_URL, api_key=config.NORNS_API_KEY)
+
+    # A conversation key keeps every message pointed at the same agent process,
+    # so an answer below reaches the agent that asked. Without one, each
+    # send_message starts a fresh run.
+    conversation = "{{.Name}}-demo"
+
+    result = client.send_message(
+        "{{.Name}}",
+        "Hello! What can you do?",
+        conversation_key=conversation,
+        wait=True,
+        timeout=60,
+    )
+
+    # If the agent calls the built-in ask_human tool it parks and waits for you.
+    # wait=True returns right away, because it can't progress on its own.
+    while result.is_waiting:
+        print(f"\n{result.waiting_for.question}")
+        result = client.send_message(
+            "{{.Name}}",
+            input("> "),
+            conversation_key=conversation,
+            wait=True,
+            timeout=60,
+        )
+
+    if result.status == "completed":
+        print(result.output)
+    else:
+        print(f"Run {result.run_id} {result.status}")
+
+
+if __name__ == "__main__":
+    main()

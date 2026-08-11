@@ -1,0 +1,31 @@
+import logging
+
+from norns import Agent, Norns
+
+from {{.PackageName}} import config
+from {{.PackageName}}.tools import all_tools
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
+
+agent = Agent(
+    name="{{.Name}}",
+    model="claude-sonnet-5",
+    system_prompt=(
+        "You are a Slack bot. Use post_to_slack to send messages; use "
+        "list_slack_channels if you are unsure of a channel name or id. "
+        "If you are missing information you cannot look up (which channel, "
+        "what to say), use ask_human rather than guessing."
+    ),
+    tools=all_tools,
+    mode="conversation",
+    max_steps=20,
+)
+
+
+def main():
+    norns = Norns(config.NORNS_URL, api_key=config.NORNS_API_KEY)
+    norns.run(agent)
+
+
+if __name__ == "__main__":
+    main()
