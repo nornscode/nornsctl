@@ -90,6 +90,21 @@ nornsctl runs reply <id> "<answer>"               Answer a run waiting on a ques
 nornsctl runs tail <id>                           Stream events in real-time
 ```
 
+### Triggers
+
+```
+nornsctl triggers list [--agent <id>]             List cron triggers
+nornsctl triggers show <id>                       Show trigger details
+nornsctl triggers create --agent <id> --name ... --cron "0 9 * * 5" --message "..."
+                                                  Create a trigger (add --conversation-key
+                                                  for persistent history across firings)
+nornsctl triggers update <id> --cron ...          Update a trigger
+nornsctl triggers enable <id>                     Enable a trigger
+nornsctl triggers disable <id>                    Disable a trigger
+nornsctl triggers fire <id>                       Fire now, outside the schedule
+nornsctl triggers delete <id>                     Delete a trigger
+```
+
 ### Conversations
 
 ```
