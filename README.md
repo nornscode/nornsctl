@@ -107,6 +107,19 @@ nornsctl triggers fire <id>                       Fire now, outside the schedule
 nornsctl triggers delete <id>                     Delete a trigger
 ```
 
+### Webhooks
+
+```
+nornsctl hooks list                               List inbound webhooks
+nornsctl hooks create --agent <id> --name ...     Create a webhook; prints its delivery URL
+         [--message-path Body] [--conversation-key-path From]
+         [--signature github|stripe|slack --signing-secret ...]
+nornsctl hooks show <id>                          Show webhook details + URL
+nornsctl hooks update <id> ...                    Update a webhook
+nornsctl hooks enable|disable <id>                Toggle a webhook
+nornsctl hooks delete <id>                        Delete a webhook
+```
+
 ### Gards
 
 ```
