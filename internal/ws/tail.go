@@ -20,11 +20,11 @@ type Event struct {
 
 // TailConfig holds the parameters for tailing a run.
 type TailConfig struct {
-	BaseURL  string
-	APIKey   string
-	AgentID  int
-	RunID    int
-	Debug    bool
+	BaseURL string
+	APIKey  string
+	AgentID int
+	RunID   int
+	Debug   bool
 }
 
 // Tail connects to the Phoenix agent channel and streams events.

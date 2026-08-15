@@ -3,18 +3,18 @@ package api
 import "time"
 
 type Agent struct {
-	ID              int        `json:"id"`
-	Name            string     `json:"name"`
-	Purpose         *string    `json:"purpose"`
-	Status          string     `json:"status"`
-	SystemPrompt    string     `json:"system_prompt"`
-	Model           *string    `json:"model"`
-	Mode            string     `json:"mode"`
-	ContextStrategy string     `json:"context_strategy"`
-	ContextWindow   int        `json:"context_window"`
-	MaxSteps        *int       `json:"max_steps"`
-	InsertedAt      time.Time  `json:"inserted_at"`
-	UpdatedAt       time.Time  `json:"updated_at"`
+	ID              int       `json:"id"`
+	Name            string    `json:"name"`
+	Purpose         *string   `json:"purpose"`
+	Status          string    `json:"status"`
+	SystemPrompt    string    `json:"system_prompt"`
+	Model           *string   `json:"model"`
+	Mode            string    `json:"mode"`
+	ContextStrategy string    `json:"context_strategy"`
+	ContextWindow   int       `json:"context_window"`
+	MaxSteps        *int      `json:"max_steps"`
+	InsertedAt      time.Time `json:"inserted_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type AgentCreate struct {
@@ -36,28 +36,28 @@ type ModelConfig struct {
 }
 
 type AgentStatus struct {
-	Status          string  `json:"status"`
-	AgentID         int     `json:"agent_id"`
-	RunID           *int    `json:"run_id"`
-	Step            int     `json:"step"`
-	ConversationID  *int    `json:"conversation_id"`
-	ConversationKey string  `json:"conversation_key"`
-	MessageCount    int     `json:"message_count"`
+	Status          string `json:"status"`
+	AgentID         int    `json:"agent_id"`
+	RunID           *int   `json:"run_id"`
+	Step            int    `json:"step"`
+	ConversationID  *int   `json:"conversation_id"`
+	ConversationKey string `json:"conversation_key"`
+	MessageCount    int    `json:"message_count"`
 }
 
 type Run struct {
-	ID               int              `json:"id"`
-	AgentID          int              `json:"agent_id"`
-	ConversationID   *int             `json:"conversation_id"`
-	Status           string           `json:"status"`
-	TriggerType      string           `json:"trigger_type"`
-	Input            map[string]any   `json:"input"`
-	Output           *string          `json:"output"`
-	FailureMetadata  map[string]any   `json:"failure_metadata"`
+	ID               int               `json:"id"`
+	AgentID          int               `json:"agent_id"`
+	ConversationID   *int              `json:"conversation_id"`
+	Status           string            `json:"status"`
+	TriggerType      string            `json:"trigger_type"`
+	Input            map[string]any    `json:"input"`
+	Output           *string           `json:"output"`
+	FailureMetadata  map[string]any    `json:"failure_metadata"`
 	FailureInspector *FailureInspector `json:"failure_inspector"`
-	WaitingFor       *WaitingFor      `json:"waiting_for"`
-	InsertedAt       time.Time        `json:"inserted_at"`
-	UpdatedAt        time.Time        `json:"updated_at"`
+	WaitingFor       *WaitingFor       `json:"waiting_for"`
+	InsertedAt       time.Time         `json:"inserted_at"`
+	UpdatedAt        time.Time         `json:"updated_at"`
 }
 
 // WaitingFor is the question a run is parked on, set when Status is "waiting".
