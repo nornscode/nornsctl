@@ -48,7 +48,7 @@ nornsctl dev logs                                 Tail server logs
 nornsctl dev reset                                Stop and delete all data
 ```
 
-Requires Docker. Runs Postgres and Norns in containers, generates an API key, and stores state in `~/.nornsctl/dev/`.
+Requires Docker. Runs Postgres and Norns in containers, generates an API key, and stores state in `~/.nornsctl/dev/`. The server listens on port 4000 by default; pass `--port` to change it (e.g. `nornsctl dev --port 4001` if something else owns 4000) and adjust `NORNS_URL` to match.
 
 By default, `nornsctl dev` runs `ghcr.io/nornscode/norns:main`. To test another image:
 
