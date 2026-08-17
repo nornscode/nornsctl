@@ -75,6 +75,12 @@ If the run asks a question, answer it with:
 
     nornsctl runs reply <run-id> "<answer>"
 
+For a live multi-turn session (only in interactive terminals — do not
+use from scripts), there is a REPL that streams tool activity and
+handles ask_human inline:
+
+    nornsctl agents chat <id> [--gard <id>] [--conversation-key <key>]
+
 ### Debug a failing run
 
     nornsctl runs list [--agent <id>] [--limit N]   # find the run

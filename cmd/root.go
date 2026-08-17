@@ -34,6 +34,23 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&apiKey, "api-key", "", "Norns API key (env: NORNS_API_KEY)")
 }
 
+func resolvedURL() string {
+	if apiURL != "" {
+		return apiURL
+	}
+	if env := os.Getenv("NORNS_URL"); env != "" {
+		return env
+	}
+	return "http://localhost:4000"
+}
+
+func resolvedKey() string {
+	if apiKey != "" {
+		return apiKey
+	}
+	return os.Getenv("NORNS_API_KEY")
+}
+
 func newClient() *client.Client {
 	url := apiURL
 	if url == "" {
