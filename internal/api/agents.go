@@ -84,6 +84,7 @@ func (s *AgentService) Status(agentID int) (*AgentStatus, error) {
 type SendMessageInput struct {
 	Content         string `json:"content"`
 	ConversationKey string `json:"conversation_key,omitempty"`
+	GardID          int    `json:"gard_id,omitempty"`
 }
 
 type SendMessageResponse struct {

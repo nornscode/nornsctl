@@ -66,8 +66,10 @@ not running — try ` + "`nornsctl dev status`" + ` or ask the operator.
 The message body goes in --content (NOT a positional argument). --wait
 blocks until the run completes, fails, or asks a question, then prints
 the result; --timeout <secs> adjusts the wait (default 120). Add
---conversation-key <key> for multi-turn context. Prints "Run ID: N" —
-use that ID with the runs commands.
+--conversation-key <key> for multi-turn context, and --gard <id> to
+bind the run to a gard (ALL of its dispatch — LLM and tools — then goes
+only to that gard's worker). Prints "Run ID: N" — use that ID with the
+runs commands.
 
 If the run asks a question, answer it with:
 

@@ -182,12 +182,14 @@ var agentsMessageCmd = &cobra.Command{
 
 		content, _ := cmd.Flags().GetString("content")
 		convKey, _ := cmd.Flags().GetString("conversation-key")
+		gardID, _ := cmd.Flags().GetInt("gard")
 		wait, _ := cmd.Flags().GetBool("wait")
 		timeout, _ := cmd.Flags().GetInt("timeout")
 
 		input := api.SendMessageInput{
 			Content:         content,
 			ConversationKey: convKey,
+			GardID:          gardID,
 		}
 
 		svc := &api.AgentService{Client: newClient()}
@@ -275,6 +277,7 @@ func init() {
 
 	agentsMessageCmd.Flags().String("content", "", "Message content (required)")
 	agentsMessageCmd.Flags().String("conversation-key", "", "Conversation key for multi-turn")
+	agentsMessageCmd.Flags().Int("gard", 0, "Bind the run to a gard: all dispatch goes only to that gard's worker")
 	agentsMessageCmd.Flags().Bool("wait", false, "Block until the run completes, fails, or asks a question, then print the result")
 	agentsMessageCmd.Flags().Int("timeout", 120, "Seconds to wait with --wait before giving up")
 	agentsMessageCmd.MarkFlagRequired("content")
