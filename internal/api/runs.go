@@ -85,6 +85,34 @@ func (s *RunService) Retry(id int) (*RetryResponse, error) {
 	return &resp, nil
 }
 
+// ForkRequest asks for a new run on a run's history up to Step.
+type ForkRequest struct {
+	Step         int    `json:"step"`
+	Message      string `json:"message,omitempty"`
+	SystemPrompt string `json:"system_prompt,omitempty"`
+	Model        string `json:"model,omitempty"`
+}
+
+type ForkResponse struct {
+	Status  string `json:"status"`
+	RunID   int    `json:"run_id"`
+	AgentID int    `json:"agent_id"`
+}
+
+// Fork starts a new run from the history of run id after step, in a fresh
+// conversation. A system prompt or model override forks onto a variant agent.
+func (s *RunService) Fork(id int, req ForkRequest) (*ForkResponse, error) {
+	data, err := s.Client.Post(fmt.Sprintf("/runs/%d/fork", id), req)
+	if err != nil {
+		return nil, err
+	}
+	var resp ForkResponse
+	if err := json.Unmarshal(data, &resp); err != nil {
+		return nil, fmt.Errorf("parsing response: %w", err)
+	}
+	return &resp, nil
+}
+
 // Reply answers a run parked on an ask_human question.
 func (s *RunService) Reply(id int, answer string) error {
 	body := map[string]string{"answer": answer}

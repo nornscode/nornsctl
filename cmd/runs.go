@@ -162,6 +162,45 @@ var runsReplyCmd = &cobra.Command{
 	},
 }
 
+var (
+	forkStep         int
+	forkMessage      string
+	forkSystemPrompt string
+	forkModel        string
+)
+
+var runsForkCmd = &cobra.Command{
+	Use:   "fork <id>",
+	Short: "Start a new run from a run's history at a step",
+	Long: `Fork starts a new run on the parent's history as it stood after --step,
+in a fresh conversation, on the same gard. --message adds a user turn.
+--system-prompt or --model forks onto a variant agent with that override,
+so prompt or model experiments are legible as their own agent.`,
+	Args: cobra.ExactArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		id, err := strconv.Atoi(args[0])
+		if err != nil {
+			return fmt.Errorf("invalid run ID: %s", args[0])
+		}
+		if !cmd.Flags().Changed("step") {
+			return fmt.Errorf("--step is required (see `nornsctl runs events %d`)", id)
+		}
+
+		svc := &api.RunService{Client: newClient()}
+		resp, err := svc.Fork(id, api.ForkRequest{
+			Step:         forkStep,
+			Message:      forkMessage,
+			SystemPrompt: forkSystemPrompt,
+			Model:        forkModel,
+		})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Forked run %d at step %d. New run ID: %d (agent %d)\n", id, forkStep, resp.RunID, resp.AgentID)
+		return nil
+	},
+}
+
 var runsTailCmd = &cobra.Command{
 	Use:   "tail <id>",
 	Short: "Stream events for a run in real-time",
@@ -328,6 +367,7 @@ func init() {
 	runsCmd.AddCommand(runsEventsCmd)
 	runsCmd.AddCommand(runsRetryCmd)
 	runsCmd.AddCommand(runsReplyCmd)
+	runsCmd.AddCommand(runsForkCmd)
 	runsCmd.AddCommand(runsTailCmd)
 
 	runsListCmd.Flags().Int("agent", 0, "Filter by agent ID")
@@ -336,4 +376,8 @@ func init() {
 	runsEventsCmd.Flags().Bool("json", false, "Output events as JSON")
 
 	runsTailCmd.Flags().Bool("debug", false, "Print raw WebSocket messages to stderr")
+	runsForkCmd.Flags().IntVar(&forkStep, "step", 0, "step to fork from (required)")
+	runsForkCmd.Flags().StringVar(&forkMessage, "message", "", "user message to append to the forked history")
+	runsForkCmd.Flags().StringVar(&forkSystemPrompt, "system-prompt", "", "fork onto a variant agent with this system prompt")
+	runsForkCmd.Flags().StringVar(&forkModel, "model", "", "fork onto a variant agent with this model")
 }
