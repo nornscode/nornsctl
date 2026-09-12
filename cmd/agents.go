@@ -310,7 +310,7 @@ func init() {
 
 	agentsCreateCmd.Flags().String("name", "", "Agent name (required)")
 	agentsCreateCmd.Flags().String("system-prompt", "", "System prompt (required)")
-	agentsCreateCmd.Flags().String("status", "active", "Agent status")
+	agentsCreateCmd.Flags().String("status", "idle", "Agent status (inactive, idle, running)")
 	agentsCreateCmd.Flags().String("purpose", "", "Agent purpose")
 	agentsCreateCmd.Flags().String("model", "", "LLM model")
 	agentsCreateCmd.MarkFlagRequired("name")
