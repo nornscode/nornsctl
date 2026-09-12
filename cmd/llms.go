@@ -101,6 +101,7 @@ or awaiting_tools with no progress usually means no worker is connected
     nornsctl agents status <id>      # live process state
     nornsctl agents create --name <n> --system-prompt <p> [--model <m>] [--purpose <p>]
     nornsctl agents update <id> [same flags]
+    nornsctl agents archive <id> [id...] [--force]   # retire; runs and history stay
 
 ### Triggers (cron)
 

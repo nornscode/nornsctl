@@ -67,6 +67,18 @@ func (s *AgentService) Update(id int, input AgentCreate) (*Agent, error) {
 	return &resp.Data, nil
 }
 
+// Archive retires an agent. Its runs, conversations, and events survive —
+// only the definition is put away, and its name is freed for reuse. The API
+// refuses with a 409 while a run is in flight unless force is set.
+func (s *AgentService) Archive(id int, force bool) error {
+	path := fmt.Sprintf("/agents/%d", id)
+	if force {
+		path += "?force=true"
+	}
+	_, err := s.Client.Delete(path)
+	return err
+}
+
 func (s *AgentService) Status(agentID int) (*AgentStatus, error) {
 	data, err := s.Client.Get(fmt.Sprintf("/agents/%d/status", agentID))
 	if err != nil {

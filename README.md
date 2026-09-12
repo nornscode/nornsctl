@@ -77,6 +77,7 @@ nornsctl agents create --name ... --system-prompt ... Create an agent
 nornsctl agents update <id> --name ...            Update an agent
 nornsctl agents status <id>                       Get agent process status
 nornsctl agents message <id> --content "..." [--wait [--timeout N]]
+nornsctl agents archive <id> [id...] [--force]    Retire agents; runs and history are kept
                                                   Send a message; --wait blocks until the run
                                                   completes, fails, or asks a question
 ```

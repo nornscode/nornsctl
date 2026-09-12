@@ -252,6 +252,52 @@ func waitForRun(runID, timeoutSeconds int) error {
 	}
 }
 
+var agentsArchiveCmd = &cobra.Command{
+	Use:     "archive <id> [id...]",
+	Aliases: []string{"delete", "rm"},
+	Short:   "Retire agents (soft-delete; runs and history are kept)",
+	// A partly-refused batch is a normal outcome here, not a usage error.
+	SilenceUsage: true,
+	Long: `Retire one or more agents.
+
+The agent leaves the list and its conversations leave the session sidebar,
+but its runs, events, and conversations all remain — they are the log, and
+are still reachable by id. The name is freed for reuse.
+
+Refuses an agent with a run pending, running, or waiting. Pass --force to
+retire it anyway; any process it has running is stopped.`,
+	Args: cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		force, _ := cmd.Flags().GetBool("force")
+		svc := &api.AgentService{Client: newClient()}
+
+		// Each id is reported on its own line and a refusal does not stop
+		// the rest: archiving a batch of stale agents should not be
+		// abandoned halfway because one of them is busy.
+		var failed int
+		for _, arg := range args {
+			id, err := strconv.Atoi(arg)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "invalid agent ID: %s\n", arg)
+				failed++
+				continue
+			}
+
+			if err := svc.Archive(id, force); err != nil {
+				fmt.Fprintf(os.Stderr, "agent %d: %v\n", id, err)
+				failed++
+				continue
+			}
+			fmt.Printf("Archived agent %d\n", id)
+		}
+
+		if failed > 0 {
+			return fmt.Errorf("%d of %d could not be archived", failed, len(args))
+		}
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(agentsCmd)
 	agentsCmd.AddCommand(agentsListCmd)
@@ -260,6 +306,7 @@ func init() {
 	agentsCmd.AddCommand(agentsUpdateCmd)
 	agentsCmd.AddCommand(agentsStatusCmd)
 	agentsCmd.AddCommand(agentsMessageCmd)
+	agentsCmd.AddCommand(agentsArchiveCmd)
 
 	agentsCreateCmd.Flags().String("name", "", "Agent name (required)")
 	agentsCreateCmd.Flags().String("system-prompt", "", "System prompt (required)")
@@ -281,4 +328,6 @@ func init() {
 	agentsMessageCmd.Flags().Bool("wait", false, "Block until the run completes, fails, or asks a question, then print the result")
 	agentsMessageCmd.Flags().Int("timeout", 120, "Seconds to wait with --wait before giving up")
 	agentsMessageCmd.MarkFlagRequired("content")
+
+	agentsArchiveCmd.Flags().Bool("force", false, "Archive even if the agent has an active run")
 }
