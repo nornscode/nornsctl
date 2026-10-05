@@ -71,6 +71,10 @@ var runsShowCmd = &cobra.Command{
 		if r.Output != nil {
 			fmt.Printf("Output:       %s\n", *r.Output)
 		}
+		fmt.Printf("Tokens:       %d in / %d out\n", r.InputTokens, r.OutputTokens)
+		for _, line := range costLines(r) {
+			fmt.Println(line)
+		}
 		fmt.Printf("Created:      %s\n", r.InsertedAt.Format("2006-01-02 15:04:05"))
 		fmt.Printf("Updated:      %s\n", r.UpdatedAt.Format("2006-01-02 15:04:05"))
 
@@ -89,6 +93,50 @@ var runsShowCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// costLines renders a run's cost for runs show: its own, the total with
+// sub-agents when they added to it, and any tokens core could not price,
+// so a run that is only partly priced never reads as cheap. Nothing from a
+// core that predates cost.
+func costLines(r *api.Run) []string {
+	if r.Cost == nil {
+		return nil
+	}
+
+	lines := []string{"Cost:         " + costString(r.Cost)}
+	unpriced, label := r.Cost.Unpriced, "Unpriced:     "
+
+	if t := r.TotalCost; t != nil && (t.USD != r.Cost.USD || len(t.Unpriced) != len(r.Cost.Unpriced)) {
+		lines = append(lines, "              "+costString(t)+" with sub-agents")
+		unpriced, label = t.Unpriced, "Unpriced:     (with sub-agents) "
+	}
+
+	for _, u := range unpriced {
+		model := "unknown model"
+		if u.Model != nil {
+			model = *u.Model
+		}
+		lines = append(lines, fmt.Sprintf("%s%d in / %d out on %s", label, u.InputTokens, u.OutputTokens, model))
+	}
+
+	return lines
+}
+
+func costString(c *api.Cost) string {
+	if len(c.Unpriced) > 0 {
+		return dollars(c.USD) + " + unpriced"
+	}
+	return dollars(c.USD)
+}
+
+// dollars shows core's decimal string to four places, enough for a run.
+func dollars(usd string) string {
+	f, err := strconv.ParseFloat(usd, 64)
+	if err != nil {
+		return usd
+	}
+	return fmt.Sprintf("$%.4f", f)
 }
 
 var runsEventsCmd = &cobra.Command{

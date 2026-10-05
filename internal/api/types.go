@@ -56,8 +56,26 @@ type Run struct {
 	FailureMetadata  map[string]any    `json:"failure_metadata"`
 	FailureInspector *FailureInspector `json:"failure_inspector"`
 	WaitingFor       *WaitingFor       `json:"waiting_for"`
+	InputTokens      int               `json:"input_tokens"`
+	OutputTokens     int               `json:"output_tokens"`
+	Cost             *Cost             `json:"cost"`
+	TotalCost        *Cost             `json:"total_cost"`
 	InsertedAt       time.Time         `json:"inserted_at"`
 	UpdatedAt        time.Time         `json:"updated_at"`
+}
+
+// Cost is what a run's LLM calls cost. USD is a decimal string and covers
+// the priced calls only; Unpriced lists the tokens of models core has no
+// price for. TotalCost on a Run adds every sub-agent run below it.
+type Cost struct {
+	USD      string          `json:"usd"`
+	Unpriced []UnpricedUsage `json:"unpriced"`
+}
+
+type UnpricedUsage struct {
+	Model        *string `json:"model"`
+	InputTokens  int     `json:"input_tokens"`
+	OutputTokens int     `json:"output_tokens"`
 }
 
 // WaitingFor is the question a run is parked on, set when Status is "waiting".
