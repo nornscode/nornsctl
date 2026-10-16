@@ -124,7 +124,7 @@ nornsctl hooks delete <id>                        Delete a webhook
 ### Workers
 
 ```
-nornsctl workers list [--json]                    Connected workers: capabilities, tools, gard, draining
+nornsctl workers list [--json]                    Connected workers, then declared serverless workers asleep
 ```
 
 ### Gards
