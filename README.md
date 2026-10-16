@@ -121,6 +121,12 @@ nornsctl hooks enable|disable <id>                Toggle a webhook
 nornsctl hooks delete <id>                        Delete a webhook
 ```
 
+### Workers
+
+```
+nornsctl workers list [--json]                    Connected workers: capabilities, tools, gard, draining
+```
+
 ### Gards
 
 ```
