@@ -64,12 +64,23 @@ func (c *Client) do(method, path string, body any) ([]byte, error) {
 			Error string `json:"error"`
 		}
 		if json.Unmarshal(data, &apiErr) == nil && apiErr.Error != "" {
-			return nil, fmt.Errorf("API error (%d): %s", resp.StatusCode, apiErr.Error)
+			return nil, &APIError{Status: resp.StatusCode, Message: apiErr.Error}
 		}
-		return nil, fmt.Errorf("API error (%d): %s", resp.StatusCode, string(data))
+		return nil, &APIError{Status: resp.StatusCode, Message: string(data)}
 	}
 
 	return data, nil
+}
+
+// APIError is a non-2xx answer from Norns. Callers that can live without an
+// endpoint (one a newer CLI knows but an older core does not) check Status.
+type APIError struct {
+	Status  int
+	Message string
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("API error (%d): %s", e.Status, e.Message)
 }
 
 func (c *Client) Get(path string) ([]byte, error) {

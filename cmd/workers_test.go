@@ -50,3 +50,22 @@ func TestConnectedFor(t *testing.T) {
 		}
 	}
 }
+
+func TestLastWoken(t *testing.T) {
+	now := time.Date(2026, 10, 15, 12, 0, 0, 0, time.UTC)
+	at := now.Add(-3 * time.Minute)
+
+	if got := lastWoken(nil, now); got != "never woken" {
+		t.Errorf("nil: got %q", got)
+	}
+	if got := lastWoken(&at, now); got != "woke 3m ago" {
+		t.Errorf("3m: got %q", got)
+	}
+}
+
+func TestServerlessToolNames(t *testing.T) {
+	w := api.ServerlessWorker{Tools: []api.ServerlessTool{{Name: "a"}, {Name: "b"}}}
+	if got := toolSummary(w.ToolNames(), len(w.Tools)); got != "a,b" {
+		t.Errorf("got %q", got)
+	}
+}
