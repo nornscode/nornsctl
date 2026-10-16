@@ -18,6 +18,7 @@ type Worker struct {
 	ToolCount    int        `json:"tool_count"`
 	Gard         *int       `json:"gard"`
 	Draining     bool       `json:"draining"`
+	Serverless   bool       `json:"serverless"`
 	ConnectedAt  *time.Time `json:"connected_at"`
 }
 
