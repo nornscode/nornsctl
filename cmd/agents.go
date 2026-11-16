@@ -115,18 +115,28 @@ var agentsUpdateCmd = &cobra.Command{
 			return fmt.Errorf("invalid agent ID: %s", args[0])
 		}
 
-		name, _ := cmd.Flags().GetString("name")
-		systemPrompt, _ := cmd.Flags().GetString("system-prompt")
-		status, _ := cmd.Flags().GetString("status")
-		purpose, _ := cmd.Flags().GetString("purpose")
-		model, _ := cmd.Flags().GetString("model")
-
-		input := api.AgentCreate{
-			Name:         name,
-			SystemPrompt: systemPrompt,
-			Status:       status,
-			Purpose:      purpose,
-			Model:        model,
+		// Only send the flags that were given: an unset flag must not
+		// overwrite the agent's current value with "".
+		var input api.AgentUpdate
+		if cmd.Flags().Changed("name") {
+			v, _ := cmd.Flags().GetString("name")
+			input.Name = &v
+		}
+		if cmd.Flags().Changed("system-prompt") {
+			v, _ := cmd.Flags().GetString("system-prompt")
+			input.SystemPrompt = &v
+		}
+		if cmd.Flags().Changed("status") {
+			v, _ := cmd.Flags().GetString("status")
+			input.Status = &v
+		}
+		if cmd.Flags().Changed("purpose") {
+			v, _ := cmd.Flags().GetString("purpose")
+			input.Purpose = &v
+		}
+		if cmd.Flags().Changed("model") {
+			v, _ := cmd.Flags().GetString("model")
+			input.Model = &v
 		}
 
 		svc := &api.AgentService{Client: newClient()}

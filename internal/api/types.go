@@ -27,6 +27,16 @@ type AgentCreate struct {
 	ModelConfig  *ModelConfig `json:"model_config,omitempty"`
 }
 
+// AgentUpdate carries only the fields being changed; nil fields are left
+// out of the request so the server keeps their current values.
+type AgentUpdate struct {
+	Name         *string `json:"name,omitempty"`
+	Purpose      *string `json:"purpose,omitempty"`
+	Status       *string `json:"status,omitempty"`
+	SystemPrompt *string `json:"system_prompt,omitempty"`
+	Model        *string `json:"model,omitempty"`
+}
+
 type ModelConfig struct {
 	Mode             string `json:"mode,omitempty"`
 	CheckpointPolicy string `json:"checkpoint_policy,omitempty"`

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -55,5 +56,27 @@ func TestArchiveSurfacesTheRefusal(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "active run") {
 		t.Errorf("error %q does not say why it was refused", err)
+	}
+}
+
+// An update sends only the fields it was given; anything else would
+// overwrite the agent's system prompt or status with "".
+func TestUpdateSendsOnlyGivenFields(t *testing.T) {
+	var got map[string]any
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		json.NewDecoder(r.Body).Decode(&got)
+		w.Write([]byte(`{"data":{"id":7,"name":"renamed"}}`))
+	}))
+	defer srv.Close()
+
+	svc := &AgentService{Client: client.New(srv.URL, "k")}
+
+	name := "renamed"
+	if _, err := svc.Update(7, AgentUpdate{Name: &name}); err != nil {
+		t.Fatalf("update: %v", err)
+	}
+	if len(got) != 1 || got["name"] != "renamed" {
+		t.Errorf("update sent %v, want only name", got)
 	}
 }

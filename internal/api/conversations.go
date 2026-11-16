@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 
 	"github.com/amackera/nornsctl/internal/client"
 )
@@ -26,7 +27,7 @@ func (s *ConversationService) List(agentID int) ([]Conversation, error) {
 }
 
 func (s *ConversationService) Get(agentID int, key string) (*Conversation, error) {
-	data, err := s.Client.Get(fmt.Sprintf("/agents/%d/conversations/%s", agentID, key))
+	data, err := s.Client.Get(fmt.Sprintf("/agents/%d/conversations/%s", agentID, url.PathEscape(key)))
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +41,6 @@ func (s *ConversationService) Get(agentID int, key string) (*Conversation, error
 }
 
 func (s *ConversationService) Delete(agentID int, key string) error {
-	_, err := s.Client.Delete(fmt.Sprintf("/agents/%d/conversations/%s", agentID, key))
+	_, err := s.Client.Delete(fmt.Sprintf("/agents/%d/conversations/%s", agentID, url.PathEscape(key)))
 	return err
 }
