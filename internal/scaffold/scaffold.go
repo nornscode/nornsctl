@@ -122,7 +122,8 @@ func Run(cfg Config) error {
 	if state != nil {
 		envContent := fmt.Sprintf("NORNS_URL=%s\nNORNS_API_KEY=%s\nANTHROPIC_API_KEY=\n", state.URL, state.APIKey)
 		envPath := filepath.Join(cfg.OutputDir, ".env")
-		if err := os.WriteFile(envPath, []byte(envContent), 0644); err != nil {
+		// 0600: the file holds the dev API key, like state.json does.
+		if err := os.WriteFile(envPath, []byte(envContent), 0600); err != nil {
 			return fmt.Errorf("writing .env: %w", err)
 		}
 		devWired = true

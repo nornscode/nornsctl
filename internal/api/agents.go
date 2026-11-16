@@ -53,7 +53,7 @@ func (s *AgentService) Create(input AgentCreate) (*Agent, error) {
 	return &resp.Data, nil
 }
 
-func (s *AgentService) Update(id int, input AgentCreate) (*Agent, error) {
+func (s *AgentService) Update(id int, input AgentUpdate) (*Agent, error) {
 	data, err := s.Client.Put(fmt.Sprintf("/agents/%d", id), input)
 	if err != nil {
 		return nil, err

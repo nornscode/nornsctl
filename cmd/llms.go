@@ -137,9 +137,9 @@ create prints the delivery URL once — capture it from the output.
     nornsctl new <name> [--template default|slack-bot] [--language python] [--dir <path>]
 
 Generates a uv-based Python project (pyproject.toml, Dockerfile,
-worker.py, tools.py) using the norns-sdk. After scaffolding: cd in, put
+worker.py, tools/) using the norns-sdk. After scaffolding: cd in, put
 NORNS_API_KEY and any tool secrets in .env, and run with
-` + "`uv run python -m <name>.worker`" + `.
+` + "`uv run <name>-worker`" + `.
 
 ### Local dev server
 
